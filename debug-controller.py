@@ -3,7 +3,7 @@ import time
 
 # --- CONFIGURAZIONE ---
 # Usiamo la numerazione BCM (quella del chip)
-PIN_CH1 = 17  # Pin fisico 11
+PIN_CH1 = 17  # Pin fisico 11 # in realta CHANNEL 4
 PIN_CH2 = 18  # Pin fisico 12
 
 class PWM_Reader:
