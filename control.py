@@ -2,7 +2,7 @@ import pigpio
 import time
 
 # --- CONFIGURAZIONE ---
-PIN_X, PIN_Y = 17, 18
+PIN_X, PIN_Y = 17, 18 # collegati rispettivamente a CH4 e CH2
 PIN_LEFT, PIN_RIGHT, PIN_UP, PIN_DOWN = 7,27,25,4
 class RC_Reader:
     def __init__(self, pi, gpio):
