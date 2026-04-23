@@ -29,21 +29,12 @@ sudo systemctl enable pigpiod
 ```
 git clone https://github.com/AlessandroBonomo28/emiglio-controller
 ```
-
-```
-python blink.py
-```
-schema TODO
-
-```
-python debug-controller.py
-```
-schema TODO
-
+Ecco un primo programma di test che riceve il segnale dal radiocomando e attiva 4 led di debug in base alla direzione di movimento
 ```
 python control.py
 ```
-schema TODO
+
+<img width="1200" height="726" alt="R-Pi-1-GPIO-Pinout-768x726-2453249405 - Copia" src="https://github.com/user-attachments/assets/72907977-5c8d-4c9b-8519-b020eae8ccf6" />
 
 ## Servizi automatici
 
