@@ -56,7 +56,7 @@ sudo nano /etc/systemd/system/control.service
 Description=Foo
 
 [Service]
-ExecStart=/usr/bin/python /home/pi/control.py
+ExecStart=/usr/bin/python /home/pi/tank.py
 
 [Install]
 WantedBy=multi-user.target
