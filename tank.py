@@ -77,7 +77,7 @@ try:
 
             # --- LOGICA DI MOVIMENTO ---
 
-            if ry > 1700: # AVANTI (Entrambi i motori avanti)
+            if ry > 1650: # AVANTI (Entrambi i motori avanti)
                 state = "AVANTI  "
                 # Motore A
                 pi.write(AIN1, 0); pi.write(AIN2, 1)
