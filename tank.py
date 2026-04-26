@@ -12,6 +12,9 @@ PWMA = 8
 BIN1, BIN2 = 7, 27     # PIN_LEFT e PIN_RIGHT
 PWMB = 11
 
+# pin per abilitare i motori
+STANDBY=24
+
 class RC_Reader:
     def __init__(self, pi, gpio):
         self.pi = pi
@@ -48,7 +51,9 @@ pins_output = [AIN1, AIN2, BIN1, BIN2, PWMA, PWMB]
 for p in pins_output:
     pi.set_mode(p, pigpio.OUTPUT)
     pi.write(p, 0)
-
+# tolgo i motori dallo standby
+pi.set_mode(STANDBY, pigpio.OUTPUT)
+pi.write(STANDBY, 1) # abilita motori
 # Inizializzazione Lettori RC
 ch_x = RC_Reader(pi, PIN_X)
 ch_y = RC_Reader(pi, PIN_Y)
