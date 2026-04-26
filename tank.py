@@ -68,8 +68,8 @@ try:
     # Limitiamo il range per sicurezza (0-255)
     SPEED = max(0, min(255, SPEED))
 except ValueError:
-    print("Metti un numero, fenomeno! Uso la velocità di default: 200")
-    SPEED = 200
+    print("Metti un numero, fenomeno! Uso la velocità di default: 255")
+    SPEED = 255
 pi.set_PWM_dutycycle(PWMA, SPEED)
 pi.set_PWM_dutycycle(PWMB, SPEED)
 
