@@ -1,6 +1,7 @@
 # emiglio-controller
 Robot controller code on Raspberry pi 1 B
-
+- https://alessandrobonomo28.github.io/posts/Trasformare-Emiglio-in-un-AI-assistant/
+- https://alessandrobonomo28.github.io/posts/Trasformare-Emiglio-in-un-AI-assistant-2/
 ## Setup
 usa `piImager` per flashare il Raspberry pi 1 B, scegli il modello, poi versione lite OS senza gui. **SCEGLI "pi" come nome utente**, il raspberry pi 1 B non ha scheda wifi quindi devi pluggare ethernet e fare una prima configurazione con cavo HDMI per sbloccare ssh. Inoltre, ci mette molto ad avviarsi e quindi per capire cosa sta succedendo all'inizio serve HDMI.
 
