@@ -2,8 +2,9 @@ import pigpio
 import time
 import sys
 
-# --- CONFIGURAZIONE PIN E MOTORI ---
+# --- CONFIGURAZIONE PIN ---
 PIN_X, PIN_Y = 17, 18  # Ingressi RC
+
 STANDBY = 24
 
 # MOTORE A (Sinistro)
@@ -14,10 +15,10 @@ PWMA = 8
 BIN1, BIN2 = 7, 27     # PIN_LEFT e PIN_RIGHT
 PWMB = 11
 
-# --- CONFIGURAZIONE FLUIDITA' (SMOOTH) ---
-SMOOTH_TIME_MS = 400   # Millisecondi per passare da 0 alla velocità massima (es. 800ms)
-# SMOOT_TIME_MS minimo: 300 ms, sotto i 300 ms si accappotta su superfice piana
-LOOP_DELAY = 0.05      # Tempo di ciclo del while (50ms)
+# --- CONFIGURAZIONE FLUIDITA' (SMOOTH DOPPIO) ---
+SMOOTH_TIME_FB_MS = 450  # Millisecondi per Avanti/Indietro
+SMOOTH_TIME_LR_MS = 200  # Millisecondi per Destra/Sinistra (più reattivo)
+LOOP_DELAY = 0.05        # Tempo di ciclo del while (50ms)
 
 class RC_Reader:
     def __init__(self, pi, gpio):
@@ -71,56 +72,55 @@ except ValueError:
     print("Metti un numero, fenomeno! Uso la velocità di default: 200")
     MAX_SPEED = 200
 
-# Calcolo dello step di accelerazione per ogni ciclo di loop
-if SMOOTH_TIME_MS > 0:
-    # Quanta velocità aggiungere ogni 50ms per raggiungere il MAX_SPEED nel tempo richiesto
-    SPEED_STEP = MAX_SPEED / (SMOOTH_TIME_MS / (LOOP_DELAY * 1000))
-else:
-    SPEED_STEP = MAX_SPEED
+# --- CALCOLO DEGLI STEP DI ACCELERAZIONE ---
+# Quanta velocità aggiungere/togliere ogni 50ms
+step_fb = MAX_SPEED / (SMOOTH_TIME_FB_MS / (LOOP_DELAY * 1000)) if SMOOTH_TIME_FB_MS > 0 else MAX_SPEED
+step_lr = MAX_SPEED / (SMOOTH_TIME_LR_MS / (LOOP_DELAY * 1000)) if SMOOTH_TIME_LR_MS > 0 else MAX_SPEED
 
-# Variabili di stato per lo Smooth
+# Variabili di stato
 current_speed = 0.0
 current_state = "STOP    "
 
-print(f"Emiglio-Tank Operativo. Max Speed: {MAX_SPEED} | Smooth Time: {SMOOTH_TIME_MS}ms")
+print(f"Emiglio-Tank Operativo. Max Speed: {MAX_SPEED} | Smooth F/B: {SMOOTH_TIME_FB_MS}ms | Smooth L/R: {SMOOTH_TIME_LR_MS}ms")
 
 try:
     while True:
         if ch_x.is_alive() and ch_y.is_alive():
             rx, ry = ch_x.width, ch_y.width
 
-            # 1. LEGGI LA VOLONTA' DEL PILOTA (Desired State)
+            # 1. LEGGI LA VOLONTA' DEL PILOTA
             if ry < 1470: desired_state = "AVANTI  "
             elif ry > 1650: desired_state = "INDIETRO"
             elif rx < 1430: desired_state = "RUOTA SX"
             elif rx > 1700: desired_state = "RUOTA DX"
             else: desired_state = "STOP    "
 
-            # 2. GESTIONE DELLA TRANSIZIONE (Smooth In / Smooth Out)
+            # 2. GESTIONE DELLA TRANSIZIONE
             if desired_state == current_state:
-                # Se continuiamo nella stessa direzione, il target è la velocità massima
                 target_speed = MAX_SPEED if desired_state != "STOP    " else 0
             else:
-                # Se vogliamo cambiare direzione (o fermarci), dobbiamo prima frenare
                 target_speed = 0
                 if current_speed == 0:
-                    # Solo quando i motori sono fermi a 0, cambiamo direzione fisica
                     current_state = desired_state
 
-            # 3. APPLICA L'ACCELERAZIONE / DECELERAZIONE
-            if current_speed < target_speed:
-                current_speed += SPEED_STEP
-                if current_speed > target_speed: current_speed = target_speed # Limite superiore
-            elif current_speed > target_speed:
-                current_speed -= SPEED_STEP
-                if current_speed < target_speed: current_speed = 0 # Limite inferiore
+            # 3. SCEGLI IL PASSO DI ACCELERAZIONE/DECELERAZIONE CORRETTO
+            if current_state in ["AVANTI  ", "INDIETRO"]:
+                active_step = step_fb
+            else:
+                active_step = step_lr
 
-            # 4. INVIA I COMANDI ALL'HARDWARE
-            # Scrive il PWM calcolato
+            # 4. APPLICA LO SMOOTH
+            if current_speed < target_speed:
+                current_speed += active_step
+                if current_speed > target_speed: current_speed = target_speed
+            elif current_speed > target_speed:
+                current_speed -= active_step
+                if current_speed < target_speed: current_speed = 0
+
+            # 5. INVIA COMANDI ALL'HARDWARE
             pi.set_PWM_dutycycle(PWMA, int(current_speed))
             pi.set_PWM_dutycycle(PWMB, int(current_speed))
 
-            # Scrive i pin di direzione in base allo stato ATTUALE (non quello desiderato)
             if current_state == "AVANTI  ":
                 pi.write(AIN1, 0); pi.write(AIN2, 1)
                 pi.write(BIN1, 1); pi.write(BIN2, 0)
@@ -138,9 +138,8 @@ try:
                 pi.write(BIN1, 0); pi.write(BIN2, 0)
 
             print(f"POWER: ON  | STATO: {current_state} | SPD: {int(current_speed):3d} | Y:{ry} X:{rx}      ", end='\r')
-
+            
         else:
-            # Sicurezza: Spegni tutto IMMEDIATAMENTE se perdi il segnale (niente smooth qui)
             print(f"POWER: OFF | Segnale assente...                                     ", end='\r')
             for p in [AIN1, AIN2, BIN1, BIN2, PWMA, PWMB]: pi.write(p, 0)
             current_speed = 0
