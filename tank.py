@@ -4,16 +4,15 @@ import time
 # --- CONFIGURAZIONE PIN ---
 PIN_X, PIN_Y = 17, 18  # Ingressi RC
 
+STANDBY=24
+
 # MOTORE A (Sinistro)
-AIN1, AIN2 = 25, 4     # PIN_UP e PIN_DOWN
+AIN1, AIN2 = 4, 25     # PIN_UP e PIN_DOWN
 PWMA = 8
 
 # MOTORE B (Destro)
 BIN1, BIN2 = 7, 27     # PIN_LEFT e PIN_RIGHT
 PWMB = 11
-
-# pin per abilitare i motori
-STANDBY=24
 
 class RC_Reader:
     def __init__(self, pi, gpio):
@@ -51,9 +50,10 @@ pins_output = [AIN1, AIN2, BIN1, BIN2, PWMA, PWMB]
 for p in pins_output:
     pi.set_mode(p, pigpio.OUTPUT)
     pi.write(p, 0)
-# tolgo i motori dallo standby
+
 pi.set_mode(STANDBY, pigpio.OUTPUT)
-pi.write(STANDBY, 1) # abilita motori
+pi.write(STANDBY, 1)
+
 # Inizializzazione Lettori RC
 ch_x = RC_Reader(pi, PIN_X)
 ch_y = RC_Reader(pi, PIN_Y)
@@ -64,12 +64,12 @@ import sys  # Aggiungi questa in alto insieme agli altri import
 # --- SOSTITUISCI LA PARTE DELLA VELOCITÀ CON QUESTA ---
 try:
     # Prende il primo argomento dopo il nome dello script, se manca usa 200
-    SPEED = int(sys.argv[1]) if len(sys.argv) > 1 else 200
+    SPEED = int(sys.argv[1]) if len(sys.argv) > 1 else 255
     # Limitiamo il range per sicurezza (0-255)
     SPEED = max(0, min(255, SPEED))
 except ValueError:
-    print("Metti un numero, fenomeno! Uso la velocità di default: 255")
-    SPEED = 255
+    print("Metti un numero, fenomeno! Uso la velocità di default: 200")
+    SPEED = 200
 pi.set_PWM_dutycycle(PWMA, SPEED)
 pi.set_PWM_dutycycle(PWMB, SPEED)
 
@@ -82,28 +82,28 @@ try:
 
             # --- LOGICA DI MOVIMENTO ---
 
-            if ry > 1650: # AVANTI (Entrambi i motori avanti)
+            if ry < 1470: # AVANTI (Entrambi i motori avanti)
                 state = "AVANTI  "
                 # Motore A
                 pi.write(AIN1, 0); pi.write(AIN2, 1)
                 # Motore B
                 pi.write(BIN1, 1); pi.write(BIN2, 0)
 
-            elif ry < 1470: # INDIETRO (Entrambi i motori indietro)
+            elif ry > 1650: # INDIETRO (Entrambi i motori indietro)
                 state = "INDIETRO"
                 # Motore A
                 pi.write(AIN1, 1); pi.write(AIN2, 0)
                 # Motore B
                 pi.write(BIN1, 0); pi.write(BIN2, 1)
 
-            elif rx > 1700: # SINISTRA (Gira sul posto a sx)
+            elif rx < 1430: # SINISTRA (Gira sul posto a sx)
                 state = "RUOTA SX"
                 # Motore A (Indietro)
                 pi.write(AIN1, 1); pi.write(AIN2, 0)
                 # Motore B (Avanti)
                 pi.write(BIN1, 1); pi.write(BIN2, 0)
 
-            elif rx < 1430: # DESTRA (Gira sul posto a dx)
+            elif rx > 1700: # DESTRA (Gira sul posto a dx)
                 state = "RUOTA DX"
                 # Motore A (Avanti)
                 pi.write(AIN1, 0); pi.write(AIN2, 1)
