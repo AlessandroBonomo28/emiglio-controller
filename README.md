@@ -44,7 +44,7 @@ python control.py
 <img width="1200" height="726" alt="R-Pi-1-GPIO-Pinout-768x726-2453249405 - Copia" src="https://github.com/user-attachments/assets/dc38b802-5264-4092-a896-d7cea30ca8b9" />
 
 ### Tank movement
-per muovere Emiglio uso lo script `tank.py`. Il driver `tb6612fng` pilota il carico di un battery pack sui 4 motori in base a 4 input gpio digitali e 2 gpio PWM che controllano la velocità del motore A e B. Più info qui:
+per muovere Emiglio uso lo script `smooth-tank.py`. Il driver `tb6612fng` pilota il carico di un battery pack sui 4 motori in base a 4 input gpio digitali e 2 gpio PWM che controllano la velocità del motore A e B. Più info qui:
 - https://lastminuteengineers.com/tb6612fng-dc-motor-control-arduino-tutorial/
 
 <img width="1200" height="726" alt="R-Pi-1-GPIO-Pinout-768x726-2453249405 - Copia - Copia" src="https://github.com/user-attachments/assets/00d1ae42-3b6a-415b-9eca-51cafb995c0e" />
@@ -61,7 +61,7 @@ sudo nano /etc/systemd/system/control.service
 Description=Foo
 
 [Service]
-ExecStart=/usr/bin/python /home/pi/tank.py
+ExecStart=/usr/bin/python /home/pi/smooth-tank.py
 
 [Install]
 WantedBy=multi-user.target
