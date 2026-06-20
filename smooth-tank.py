@@ -15,7 +15,7 @@ BIN1, BIN2 = 7, 27     # PIN_LEFT e PIN_RIGHT
 PWMB = 11
 
 # --- CONFIGURAZIONE FLUIDITA' (SMOOTH) ---
-SMOOTH_TIME_MS = 350   # Millisecondi per passare da 0 alla velocità massima (es. 800ms)
+SMOOTH_TIME_MS = 400   # Millisecondi per passare da 0 alla velocità massima (es. 800ms)
 # SMOOT_TIME_MS minimo: 300 ms, sotto i 300 ms si accappotta su superfice piana
 LOOP_DELAY = 0.05      # Tempo di ciclo del while (50ms)
 
